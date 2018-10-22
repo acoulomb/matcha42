@@ -20,8 +20,8 @@ on en crée une vide sous forme d'array avant la suite */
 })
 
 /* On affiche la todolist et le formulaire */
-.get('/todo', function(req, res) {
-	res.render('todo.ejs', {todolist: req.session.todolist});
+.get('/todo', function(req, res) { 
+    res.render('todo.ejs', {todolist: req.session.todolist});
 })
 
 /* On ajoute un élément à la todolist */
@@ -45,4 +45,4 @@ on en crée une vide sous forme d'array avant la suite */
     res.redirect('/todo');
 })
 
-.listen(8080);
+.listen(8080);   
