@@ -128,3 +128,54 @@ p {
 }
 
 /* Home Page -- Not logged CSS ends */
+
+/* Profile Page */
+
+.hashtag{
+    /* box-shadow:inset 0 0 0 3px rgb(255, 0, 100); */
+    background-color: rgb(238, 162, 162);
+    color: #fff;
+    /* cursor: pointer; */
+    border: rgb(255, 100, 100);
+    margin-bottom: 20px;
+}
+
+.hashtag:hover{
+    background-color: rgb(238, 162, 162);
+    cursor: pointer;
+    border-color: rgb(255, 0, 100);
+    margin-bottom: 20px;
+}
+
+.profile-pic {
+    padding: 0 20px 20px 0;
+}
+
+.description{
+    padding: 20px 0 20px 0;
+}
+
+.carroussel{
+    padding: 0px;
+    border: none;
+    /* max-height: 200px; */
+    /* max-width: 200px; */
+}
+
+.btn:not(:disabled):not(.disabled) .popularity {
+    background-color: rgb(255, 0, 100);
+    border:none;
+    cursor: default;
+}
+
+.popularity {
+    background-color: rgb(255, 0, 100);
+    border:none;
+    cursor: default;
+}
+
+.popularity:hover {
+    background-color: rgb(255, 0, 100);
+    border:none;
+    cursor: auto;
+}

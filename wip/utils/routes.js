@@ -24,16 +24,19 @@ class Routes{
 
         this.app.get('/profile', (request, response) => {
             if (!request.session.user) {
-                return response.render('index');
-            }
+                return response.render('pages/profile2');
+                // return response.render('index');
+
+                }
             // console.log(request.session.user);
-            const sql = "SELECT * FROM matcha.users WHERE username = ?";
-            checkDb.query(sql, [request.session.user.username]).then((result) => {
-                console.log(result);
-                response.render('pages/profile', {user: result});
-            }).catch(() => {
-                console.log('ko');
-            });
+            // const sql = "SELECT * FROM matcha.users WHERE username = ?";
+            // checkDb.query(sql, [request.session.user.username]).then((result) => {
+                // console.log(result);
+                response.render('pages/profile2');
+                // response.render('pages/profile', {user: result});
+                // }).catch(() => {
+                // console.log('ko');
+            // });
             // console.log(result);
         });
 

@@ -15,7 +15,9 @@ class DatabaseRequest {
                 user: 'root1',
                 password: 'root00',
                 database: 'matcha',
-                debug: false
+                debug: false,
+                // port: '8080',
+                // socketPath: '/Applications/MAMP/tmp/mysql/mysql.sock'
             });
     }
 
