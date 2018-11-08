@@ -4,6 +4,8 @@ const saltRounds = 10;
 const nodemailer = require('nodemailer');
 
 const str = require('../models/str');
+const fs = require('fs');
+const hogan = require('hogan.js');
 const random = new str();
 
 class DatabaseRequest {
@@ -15,13 +17,11 @@ class DatabaseRequest {
                 user: 'root1',
                 password: 'root00',
                 database: 'matcha',
-                debug: false,
-                // port: '8080',
-                // socketPath: '/Applications/MAMP/tmp/mysql/mysql.sock'
+                debug: false
             });
     }
 
-    query(sql, args = false) {
+    query(sql, args) {
         return new Promise((resolve, reject) => {
             this.connection.query(sql, args, (err, rows) => {
                 if (err)
@@ -80,6 +80,10 @@ class DatabaseRequest {
         return await this.query(`SELECT count(username) as count FROM matcha.users WHERE username = ?`, [params]);
     }
 
+    async checkResetToken(params){
+        return await this.query(`SELECT count(resetToken) as count FROM matcha.users WHERE resetToken = ?`, [params]);
+    }
+
     async checkEmail(params){
         console.log('email: ', params);
         return await this.query(`SELECT count(email) as count FROM matcha.users WHERE email = ?`, [params]);
@@ -121,18 +125,9 @@ class DatabaseRequest {
                     function (error, results, fields) { if (error) throw error; });
 
                 //Sending emails
-                const output = `
-                    <p>You have been registered to our Website</p>
-                    <h3>Contact Details</h3>
-                    <ul>
-                    <li>FirstName: ${params['firstname']}</li>
-                    <li>LastName: ${params['lastname']}</li>
-                    <li>Email: ${params['email']}</li>
-                    <li>Username: ${params['username']}</li>
-                    </ul>
-                    <h3>Link to confirm</h3>
-                    <p><a href="http://localhost:3000/verify/register/${registerToken}">Verify your account</a></p>
-                    `;
+
+                const template = fs.readFileSync('views/pages/registrationEmail.ejs', 'utf-8');
+                const compiledTemplate = hogan.compile(template);
 
                 let transporter = nodemailer.createTransport({
                     host: 'smtp.gmail.com',
@@ -152,7 +147,7 @@ class DatabaseRequest {
                     to: params['email'], // list of receivers
                     subject: 'Confirm your Registration to Matcha website', // Subject line
                     text: 'Hello world?', // plain text body
-                    html: output // html body
+                    html: compiledTemplate.render({firstname: params['email']}) // render template
                 };
 
                 transporter.sendMail(mailOptions, (error, info) => {
@@ -218,7 +213,75 @@ class DatabaseRequest {
         }
     }
 
+    async resetPassword(params) {
+        try {
+            bcrypt.hash(params['newPassword'], saltRounds, (err, hash) => {
+                this.query("UPDATE matcha.users SET password = ?, resetToken = NULL, reset_at = NULL WHERE resetToken = ?",
+                    [hash, params['resetToken']],
+                    function (error, results, fields) { if (error) throw error; });
+            });
+            return true;
+        } catch (error){
+            console.log(error);
+            return false;
+        }
+    }
 
+    async getUser(params){
+        try {
+            return new Promise((resolve, reject) => {
+                const sql = "SELECT * FROM matcha.users WHERE username = ?";
+                this.query(sql, params).then((user) => {
+                    if (user){
+                        resolve(user);
+                    } else {
+                        reject('no user found');
+                    }
+                });
+            });
+        } catch (error){
+            console.log(error);
+            return false;
+        }
+    }
+
+    async getAllUsers(){
+        try {
+            return new Promise((resolve, reject) => {
+                const sql = "SELECT * FROM matcha.users WHERE registerToken = 'NULL'";
+                this.query(sql).then((users) => {
+                    if (users){
+                        resolve(users);
+                    } else {
+                        reject('no user found');
+                    }
+                });
+            });
+        } catch (error){
+            console.log(error);
+            return false;
+        }
+    }
+
+    async getTags(params){
+        try {
+            return new Promise((resolve, reject) => {
+                const sql = "SELECT * FROM matcha.tags WHERE user_id = ?";
+                this.query(sql, params).then((tags) => {
+                    if (tags){
+                        // console.log(tags);
+                        resolve(tags);
+                    } else {
+                        // console.log(tags);
+                        reject(tags);
+                    }
+                });
+            });
+        } catch (error){
+            console.log(error);
+            return false;
+        }
+    }
 
 }
 

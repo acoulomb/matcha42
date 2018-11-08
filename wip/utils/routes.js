@@ -6,8 +6,8 @@ const checkDb = new databaseRequest();
 const registerValidation = require('../models/registerValidation');
 let validation = new registerValidation();
 
-//var cookieParser = require('cookie-parser');
-const nodemailer = require('nodemailer');
+const userDatabase =require('../models/userData');
+const userData = new userDatabase();
 
 class Routes{
     constructor(app){
@@ -15,30 +15,17 @@ class Routes{
     }
 
     appRoutes(){
-        this.app.get('/', (request,response) => {
+        this.app.get('/', async (request,response) => {
             if (!request.session.user) {
-                return response.render('index');
+                //console.log('session KO: ', request.session);
+                response.status(200).render('index');
+            } else {
+                //console.log('session OK: ', request.session);
+                response.status(200).render('pages/dashboard');
             }
-            response.render('pages/dashboard');
         });
 
-        this.app.get('/profile', (request, response) => {
-            if (!request.session.user) {
-                return response.render('pages/profile2');
-                // return response.render('index');
-
-                }
-            // console.log(request.session.user);
-            // const sql = "SELECT * FROM matcha.users WHERE username = ?";
-            // checkDb.query(sql, [request.session.user.username]).then((result) => {
-                // console.log(result);
-                response.render('pages/profile2');
-                // response.render('pages/profile', {user: result});
-                // }).catch(() => {
-                // console.log('ko');
-            // });
-            // console.log(result);
-        });
+        /* Routes for Authentication */
 
         this.app.post('/login', async (request, response)=> {
             const loginResponse = {};
@@ -48,40 +35,53 @@ class Routes{
             };
             if ((data.username === '' || data.username === null) && (data.password === '' || data.password === null)) {
                 loginResponse.error = true;
+                loginResponse.type = 'warning';
                 loginResponse.message = `fields cannot be empty`;
-                response.status(412).json(loginResponse);
+                request.flash(loginResponse.type, loginResponse.message);
+                response.status(412).redirect('/');
             } else if (data.username === '' || data.username === null) {
                 loginResponse.error = true;
+                loginResponse.type = 'warning';
                 loginResponse.message = `username cant be empty.`;
-                response.status(412).json(loginResponse);
+                request.flash(loginResponse.type, loginResponse.message);
+                response.status(412).redirect('/');
             } else if(data.password === '' || data.password === null){
                 loginResponse.error = true;
+                loginResponse.type = 'warning';
                 loginResponse.message = `password cant be empty.`;
-                response.status(412).json(loginResponse);
+                request.flash(loginResponse.type, loginResponse.message);
+                response.status(412).redirect('/');
             } else {
                 checkDb.checkActive(data.username).then(() => {
                     checkDb.loginUser(data).then( (result) => {
                         loginResponse.error = false;
+                        loginResponse.type = 'dark';
                         loginResponse.userId = result[0].id;
                         loginResponse.message = `User logged in.`;
                         request.session.user = data;
-                        response.status(200).render('pages/loggedIn', {
-                            username: data.username,
-                            password: data.password,
-                            message: loginResponse.message
-                        });
+                        request.session.user.id = result[0].id;
+                        console.log(request.session.user);
+                        request.flash(loginResponse.type, loginResponse.message);
+                        response.status(200).redirect('/profil');//.render('pages/profil', {
+                            //username: data.username,
+                            //password: data.password,
+                            //message: loginResponse.message
+                        //});
                     }).catch((result) => {
                         if (result === undefined || result === false) {
                             loginResponse.error = true;
+                            loginResponse.type = 'warning';
                             loginResponse.message = `Invalid username and password combination.`;
-                            console.log('Invalid username or password');
-                            response.status(401).render('pages/error', {message: loginResponse.message});
+                            request.flash(loginResponse.type, loginResponse.message);
+                            response.status(401).redirect('/');
                         }
                     });
                 }).catch((val) => {
                     loginResponse.error = true;
+                    loginResponse.type = 'warning';
                     loginResponse.message = val;
-                    response.status(420).json(loginResponse);
+                    request.flash(loginResponse.type, loginResponse.message);
+                    response.status(420).redirect('/');
                 });
             }
         });
@@ -103,7 +103,9 @@ class Routes{
                 data.password === '' || data.confirmPassword === '') {
                 registrationResponse.error = true;
                 registrationResponse.message = `One of the fields is empty -- ALL MANDATORY`;
-                response.status(412).json(registrationResponse);
+                registrationResponse.type = 'warning';
+                request.flash(registrationResponse.type, registrationResponse.message);
+                response.status(412).redirect('/');
             } else {
                 await validation.isName(data.firstname, 'Wrong firstname');
                 await validation.isName(data.lastname, 'Wrong lastname');
@@ -113,49 +115,56 @@ class Routes{
                 console.log(validation.errors);
 
                 if (validation.errors.length === 0) {
-                    console.log('on passe au check db !');
+                    //console.log('on passe au check db !');
                     const resultUsername  = await checkDb.checkUsername(data.username);
                     const resultEmail = await checkDb.checkEmail(data.email);
-                    console.log('count db username: ', resultUsername[0].count);
-                    console.log('count db email: ', resultEmail[0].count);
+                    //console.log('count db username: ', resultUsername[0].count);
+                    //console.log('count db email: ', resultEmail[0].count);
 
                     if (resultUsername[0].count !== 0 && resultEmail[0].count !== 0) {
-                        response.status(401).json({
-                            error:true,
-                            message: 'This username and email are already taken.'
-                        });
+                        registrationResponse.error = true;
+                        registrationResponse.message = `This username and email are already taken.`;
+                        registrationResponse.type = 'warning';
+                        request.flash(registrationResponse.type, registrationResponse.message);
+                        response.status(401).redirect('/');
                     } else if (resultUsername[0].count !== 0 && resultEmail[0].count === 0) {
-                        response.status(401).json({
-                            error:true,
-                            message: 'This username is already taken.'
-                        });
+                        registrationResponse.error = true;
+                        registrationResponse.message = `This username is already taken.`;
+                        registrationResponse.type = 'warning';
+                        request.flash(registrationResponse.type, registrationResponse.message);
+                        response.status(401).redirect('/');
                     } else if (resultUsername[0].count === 0 && resultEmail[0].count !== 0) {
-                        response.status(401).json({
-                            error:true,
-                            message: 'This email is already taken.'
-                        });
+                        registrationResponse.error = true;
+                        registrationResponse.message = `This email is already taken.`;
+                        registrationResponse.type = 'warning';
+                        request.flash(registrationResponse.type, registrationResponse.message);
+                        response.status(401).redirect('/');
                     }
                     else {
-                        console.log("Je peux ajouter le nouvel utilisateur !! Youpiiii");
+                        //console.log("Je peux ajouter le nouvel utilisateur !! Youpiiii");
                         const result = await checkDb.registerUser(data);
-                        console.log(result);
+                        //console.log(result);
                         if (result === false) {
+                            registrationResponse.type = 'warning';
                             registrationResponse.error = true;
                             registrationResponse.message = `User registration unsuccessful,try after some time.`;
-                            response.status(417).json(registrationResponse);
+                            request.flash(registrationResponse.type, registrationResponse.message);
+                            response.status(417).redirect('/');
                         } else {
                             registrationResponse.error = false;
                             registrationResponse.userId = result.insertId;
-                            registrationResponse.message = `User registration successful.`;
-                            response.status(200).render('pages/registered',
-                                { firstname: data.firstname, lastname: data.lastname,
-                                    username: data.username, password: data.password, email: data.email });
+                            registrationResponse.type = 'dark';
+                            registrationResponse.message = `User registration successful. An email to confirm your registration has been sent to your mailbox`;
+                            request.flash(registrationResponse.type, registrationResponse.message);
+                            response.status(200).redirect('/');
                         }
                     }
                 } else {
+                    registrationResponse.type = 'warning';
                     registrationResponse.error = true;
                     registrationResponse.message = `Error fields format... Check which is wrong please`;
-                    response.status(417).json(registrationResponse);
+                    request.flash(registrationResponse.type, registrationResponse.message);
+                    response.status(417).redirect('/');
                     validation.errors = [];
                 }
             }
@@ -186,6 +195,7 @@ class Routes{
                     checkDb.checkActive(request.body.checkEmail).then(() => {
                         console.log('All good, je peux envoyer mon mail de reset');
                         checkDb.resetToken(request.body.checkEmail);
+                        response.redirect('/');
                     }).catch(() => {
                         console.log("DB: Compte pas actif");
                         response.status(401).json({
@@ -221,30 +231,51 @@ class Routes{
             });
         });
 
-        this.app.get('/verify/reset/:resetToken', async (request, response) => {
-            /*const loginResponse = {};
-            checkDb.checkRegisterToken(request.params.registerToken).then((result) => {
-                const data = {
-                    username: result[0].username,
-                    password: result[0].password
-                };
-                loginResponse.error = false;
-                loginResponse.userId = result[0].id;
-                loginResponse.message = `User logged in.`;
-                request.session.user = data;
-                response.status(200).render('pages/loggedIn', {
-                    username: data.username,
-                    password: data.password,
-                    message: loginResponse.message
+        this.app.route('/verify/reset/:resetToken')
+            .get((request, response) => {
+                checkDb.checkResetToken(request.params.resetToken).then((result) => {
+                    if (result[0].count === 0) {
+                        response.status(401).json({
+                            error:true,
+                            message: 'Token invalide...'
+                        });
+                    } else {
+                        response.render('pages/resetPassword', {resetToken: request.params.resetToken});
+                        console.log("Je rentre dans GET");
+                    }
+                }).catch(() => {
+                    response.status(417).json("Une erreur s'est produite, merci de bien vouloir reessayer");
                 });
-            }).catch(() => {
-                loginResponse.error = true;
-                loginResponse.message = `Token not valid`;
-                console.log('Token not valid');
-                response.status(401).render('index');
-            });*/
+            }).post(async (request, response) => {
+            console.log("Je rentre dans POST");
+            const resetResponse = {};
+            const data = {
+                resetToken: request.body.resetToken,
+                newPassword: request.body.modifyPassword,
+                confirmPassword: request.body.modifyPasswordConfirm
+            };
+            await validation.isConfirmed(data.newPassword, data.confirmPassword, "Wrong matching password");
+            console.log(validation.errors);
+            if (validation.errors.length === 0) {
+                const result = await checkDb.resetPassword(data);
+                console.log(result);
+                if (result === false) {
+                    resetResponse.error = true;
+                    resetResponse.message = `Reset password unsuccessful,try after some time.`;
+                    response.status(417).json(resetResponse);
+                } else {
+                    resetResponse.error = false;
+                    //resetResponse.userId = result.insertId;
+                    resetResponse.message = `Votre mot de passe a bien été modifié`;
+                    response.status(200).redirect('/');
+                }
 
-            console.log("J'ai clique sur le lien de mon mail de ResetPassword");
+            } else {
+                resetResponse.error = true;
+                resetResponse.message = `Error fields format...`;
+                response.status(417).json(resetResponse);
+                validation.errors = [];
+            }
         });
 
         this.app.get('/loggedIn', (request, response) => {
@@ -260,7 +291,7 @@ class Routes{
 
         this.app.get('/logout', function(request, result){
             let cookie = request.cookies;
-            for (var prop in cookie) {
+            for (let prop in cookie) {
                 if (!cookie.hasOwnProperty(prop)) {
                     continue;
                 }
@@ -269,6 +300,115 @@ class Routes{
             }
             result.redirect('/');
         });
+
+        /* Routes for Profil */
+
+        this.app.get('/profil', (request, response) => {
+            if (!request.session.user) {
+                return response.render('index');
+			}
+			checkDb.getUser(request.session.user.username).then((user) => {
+				checkDb.getTags(request.session.user.id).then((tags) => {
+					console.log(tags);
+					userData.userAge(user[0]['birth']).then((age) => {
+						response.render('pages/profil', {
+						user: user,
+						userage: age,
+						usertags: tags
+						});
+					}).catch((age) => {
+						response.render('pages/profil', {
+						user: user,
+						usertags: tags,
+						userage: null
+						});
+					});
+				});
+			});
+		});	
+
+		/* Routes for Search */
+
+        this.app.get('/search', (request, response) => {
+            if (!request.session.user) {
+                return response.render('index');
+			}
+			checkDb.getAllUsers().then((users) => {
+				// console.log(users);
+				response.render('pages/search', {
+				users: users,
+				});
+			}).catch((users) => {
+				// console.log(users);
+				response.render('pages/search', {
+				users: users,
+				});
+			});
+        });
+        
+
+		/* Routes for infinite */
+
+        this.app.get('/search-infinite', (request, response) => {
+			if (!request.session.user) {
+                return response.render('index');
+			} else {
+                console.log(request.query.index);
+				checkDb.getAllUsers().then((users) => {
+					response.render('pages/search-infinite', {
+                    users: users,
+                    index: request.query.index
+					});
+				}).catch((users) => {
+					// console.log(users);
+					response.render('index',{
+					users: users,
+					});
+				});
+			}
+		});
+		
+				/* Routes for Test */
+
+				this.app.get('/test', (request, response) => {
+					if (!request.session.user) {
+						return response.render('index');
+					}
+					checkDb.getAllUsers().then((users) => {
+						console.log(users);
+						response.render('pages/test', {
+						users: users,
+						});
+					}).catch((users) => {
+						console.log(users);
+						response.render('pages/test', {
+						users: users,
+						});
+					});
+				});
+				
+		
+				/* Routes for infinite-test */
+		
+				this.app.get('/test2', (request, response) => {
+					if (!request.session.user) {
+						return response.render('index');
+					} else {
+						checkDb.getAllUsers().then((users) => {
+							response.render('pages/test2', {
+							users: users,
+							});
+						}).catch((users) => {
+							console.log(users);
+							response.render('index',{
+							users: users,
+							});
+						});
+					}
+				});
+
+		/* Routes for ... */
+
     }
 
     routesConfig(){
