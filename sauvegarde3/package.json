@@ -1,0 +1,28 @@
+{
+  "name": "matcha",
+  "version": "1.0.0",
+  "description": "42 pproject: Dating website using NodeJS MySQL and Bootstrap librairy",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node utils/setup.js && nodemon server.js || true"
+  },
+  "author": "nristorc - acoulomb",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^3.0.2",
+    "body-parser": "^1.18.3",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.4.3",
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "express-messages": "^1.0.1",
+    "express-session": "^1.15.6",
+    "fs": "0.0.1-security",
+    "hogan.js": "^3.0.2",
+    "multer": "^1.4.1",
+    "mysql": "^2.16.0",
+    "nodemailer": "^4.6.8",
+    "nodemon": "^1.18.4"
+  }
+}

@@ -1,0 +1,538 @@
+<%- include('../partial/head')%>
+<%- include('../partial/header')%>
+
+<%- messages('partial/message', locals) %>
+
+<!-- Modal -->
+<% if (user && user[0] && (user[0].birth === null || user[0].birth === '' ||user[0].gender == null || user[0].gender === '' || user[0].orientation === null || user[0].orientation === '' || user[0].description === null || user[0].description === '')) { %>
+	<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalCenterTitle">Informations Personnelles</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body" id="modal-body1">
+					<p style="text-align: center"><%=user[0].firstname%>, Afin de finaliser votre profil</p>
+					<input name="displayUser" type="hidden" id="displayUser" value="<%=user[0].username%>">
+					<p style="text-align: center">Merci de renseigner les champs restés vides</p>
+					<form id="saveProfile">
+						<div class="form-group">
+							<label for="gender" class="col-form-label">Votre Genre</label>
+							<select name="gender" class="form-control" id="gender">
+								<option value="Femme" selected>Femme</option>
+                                <option value="Homme">Homme</option>
+                                <option value="Femme-Transgenre">Femme Transgenre</option>
+                                <option value="Homme-Transgenre">Homme Transgenre</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="birthdate" class="col-form-label">Votre Date de Naissance</label>
+							<input name="birthdate" type="text" class="form-control" id="birthdate" value="<%=user[0].birth%>">
+						</div>
+						<div class="form-group">
+							<label for="sexOrientation" class="col-form-label">Votre Orientation Sexuelle</label>
+							<select name="orientation" class="form-control" id="sexOrientation">
+								<option value="Hétérosexuel">Hétérosexuel</option>
+                                <option value="Homosexuel">Homosexuel</option>
+                                <option value="Bisexuel" selected>Bisexuel</option>
+                                <option value="Homosexuel">Pansexuel</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="description" class="col-form-label">Description</label>
+							<textarea name="description" class="form-control" id="description"><%=user[0].description%></textarea>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+							<button type="submit" class="btn login-btn">Confirmer</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+<% } %>
+
+<div class="media">
+    <img src="<%=user[0]['profil']%>" alt="profilPic" class="rounded float-left profile-pic" height="240px" width="240px">
+    <div class="media-body">
+		<button type="button" class="btn btn-primary popularity">
+			Popularité <span class="badge badge-light"><%=user[0]['popularity']%>%</span>
+		</button>
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#accountParam">
+            Vos Paramètres  <span><i class="fas fa-toolbox"></i></span>
+        </button>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editProfil">
+            Votre Profil  <span><i class="fas fa-user-edit"></i></span>
+        </button>
+		<h2 class="mt-0" id="userDetails"><%=user[0]['username']%> (<%=user[0]['firstname']%> <%=user[0]['lastname']%>)</h2>
+
+
+		<!-- Modal Parameters-->
+		<div class="modal fade" id="accountParam" tabindex="-1" role="dialog" aria-labelledby="accountParametersModification" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="accountParametersModification">Modifier les paramètres de votre Compte</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body" id="modal-body2">
+						<form id="modifyParams">
+							<div class="form-group">
+								<label for="firstname" class="col-form-label">Prénom</label>
+								<input name="firstname" type="text" class="form-control" id="firstname" value="<%=user[0].firstname%>">
+							</div>
+							<div class="form-group">
+								<label for="lastname" class="col-form-label">Nom</label>
+								<input name="lastname" type="text" class="form-control" id="lastname" value="<%=user[0].lastname%>">
+							</div>
+							<div class="form-group">
+								<label for="email" class="col-form-label">Email</label>
+								<input name="email" type="email" class="form-control" id="email" value="<%=user[0].email%>">
+							</div>
+							<div class="form-group">
+								<label for="username" class="col-form-label">Identifiant</label>
+								<input name="username" type="text" class="form-control" id="username" value="<%=user[0].username%>">
+							</div>
+							<div class="form-group">
+								<label for="birth" class="col-form-label">Votre Date de Naissance</label>
+								<input name="birth" type="text" class="form-control" id="birth" value="<%=user[0].birth%>">
+							</div>
+
+							<div class="accordion" id="modifyPass">
+								<button class="btn btn-dark collapsed" type="button" data-toggle="collapse" data-target="#open" aria-expanded="false" aria-controls="collapse">
+									Modifier son Mot de Passe
+								</button>
+							</div>
+							<div id="open" class="collapse" data-parent="#modifyPass">
+								<div class="card-body">
+									<div class="form-group">
+										<label for="currentPass">Mot de Passe actuel</label>
+										<input type="password" class="form-control" id="currentPassword" name="currentPassword" placeholder="Entrez votre mot de passe actuel">
+										<input type="password" class="form-control" id="newPass" name="newPass" placeholder="Nouveau Mot de Passe">
+										<input type="password" class="form-control" id="confirmNewPass" name="confirmNewPass" placeholder="Confirmer le nouveau mot de passe">
+									</div>
+								</div>
+							</div>
+
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+								<button type="submit" class="btn login-btn">Modifier</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+        <!-- Modal Profile-->
+        <div class="modal fade" id="editProfil" tabindex="-1" role="dialog" aria-labelledby="editProfilInfo" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editProfilInfo">Editer votre Profil RoooCool</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="modal-body3">
+                        <form id="modifyProfile">
+                            <div class="form-group">
+                                <label for="editGender" class="col-form-label">Votre Genre</label>
+                                <select name="editGender" class="form-control" id="editGender">
+                                    <option value="Femme"<% if (user[0].gender === 'Femme') {%> selected <%}%>>Femme</option>
+                                    <option value="Homme"<% if (user[0].gender === 'Homme') {%> selected <%}%>>Homme</option>
+                                    <option value="Femme-Transgenre"<% if (user[0].gender === 'Femme-Transgenre') {%> selected <%}%>>Femme Transgenre</option>
+                                    <option value="Homme-Transgenre"<% if (user[0].gender === 'Homme-Transgenre') {%> selected <%}%>>Homme Transgenre</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editOrientation" class="col-form-label">Votre Orientation Sexuelle</label>
+                                <select name="editOrientation" class="form-control" id="editOrientation">
+                                    <option value="Hétérosexuel"<% if (user[0].orientation === 'Hétérosexuel') {%> selected <%}%>>Hétérosexuel</option>
+                                    <option value="Homosexuel"<% if (user[0].orientation === 'Homosexuel') {%> selected <%}%>>Homosexuel</option>
+                                    <option value="Bisexuel"<% if (user[0].orientation === 'Bisexuel') {%> selected <%}%>>Bisexuel</option>
+                                    <option value="Pansexuel"<% if (user[0].orientation === 'Pansexuel') {%> selected <%}%>>Pansexuel</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editDescription" class="col-form-label">Description</label>
+                                <textarea name="editDescription" class="form-control" id="editDescription"><%=user[0].description%></textarea>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn login-btn">Modifier</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm" id=genderOrientation>
+				<% if (user[0]['gender'] === null) { %>
+					Genre non renseigne,
+				<%} else { %>
+					<%=user[0]['gender']%>,
+				<% } %>
+				<% if (user[0]['orientation'] === null) { %>
+					Orientation non renseignee
+				<%} else { %>
+					<%=user[0]['orientation']%>
+				<% } %>
+			</div>
+		</div>
+		<div class="row" id="age">
+			<div class="col-sm" id="displayAge">
+				<% if (user[0]['birth'] == null) { %>
+					Date de naissance manquante
+				<%} else { %>
+					<%= userage %> ans
+				<% } %>
+			</div>
+		</div>
+		<div class="row" id="location">
+			<div class="col-sm">
+				À 7km
+			</div>
+		</div>
+		<div class="description" id="desc">
+			<% if (user[0]['description'] == null) { %>
+				Description manquante
+			<%} else { %>
+				<%=user[0]['description']%>
+			<% } %>
+		</div>
+
+		<% if (usertags != "") { 
+			for (var i=0; i<usertags.length; i++){ %>
+				<a class="btn btn-primary hashtag" href="#" role="button">#<%=usertags[i]['tag']%></a>
+		<% }} %>
+	</div>
+</div>
+
+<div class="row" id="rowPic" style="justify-content: left; margin-left: 4%;">
+
+    <div class="col-sm">
+        <img src="http://www.journeedelafemme.com/wp-content/uploads/2018/05/pexels-photo-733872.jpeg" class="img-thumbnail carroussel" alt="...">
+    </div>
+    <div class="col-sm">
+        <img src="https://www.cadre-dirigeant-magazine.com/wp-content/uploads/2016/02/Femme-m%C3%A8re-et-manager-6-astuces-pour-gagner-en-s%C3%A9r%C3%A9nit%C3%A9CDM.jpg" class="img-thumbnail carroussel" alt="...">
+    </div>
+    <div class="col-sm">
+        <img src="http://www.journeedelafemme.com/wp-content/uploads/2018/05/pexels-photo-733872.jpeg" class="img-thumbnail carroussel" alt="...">
+    </div>
+    <div class="col-sm">
+        <img src="https://www.cadre-dirigeant-magazine.com/wp-content/uploads/2016/02/Femme-m%C3%A8re-et-manager-6-astuces-pour-gagner-en-s%C3%A9r%C3%A9nit%C3%A9CDM.jpg" class="img-thumbnail carroussel" alt="...">
+    </div>
+
+    <form id="uploadPics" style="text-align: center;" enctype="multipart/form-data" method="POST" action="/profil">
+        <label for="inputFile"><span><i class="fas fa-plus-circle fa-5x" style="color: #888888; text-align: center;"></i></span><br/>
+            Ajouter une image
+        </label>
+            <input id="inputFile" type="file" name="inputFile" style="display: none">
+    </form>
+
+</div>
+
+<% include ../partial/footer.ejs%>
+
+<script>
+
+    $(function () {
+
+        $(document).ready(function() {
+
+            $("#inputFile").change(function() {
+                $("#uploadPics").submit();
+            });
+
+            $('#exampleModalCenter').modal('show');
+
+			if ($('#birthdate').val()) {
+                let now = new Date($('#birthdate').val());
+                let options = {
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
+                };
+				$("#birthdate").attr("value", now.toLocaleString('en-GB', options));
+			}
+
+            if ($('#birth').val()) {
+                let now = new Date($('#birth').val());
+                let options = {
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
+                };
+                $("#birth").attr("value", now.toLocaleString('en-GB', options));
+            }
+
+            $('form[id=saveProfile]').submit(function(event) {
+
+                $('.form-group').removeClass('has-error'); // remove the error class
+                $('.help-block').remove(); // remove the error text
+
+                // get the form data
+                // there are many ways to get this data using jQuery (you can use the class or id also)
+                var formData = {
+                    'gender'              : $('select[name=gender]').val(),
+                    'birthdate'             : $('input[name=birthdate]').val(),
+                    'orientation'    : $('select[name=orientation]').val(),
+                    'description'    : $('textarea[name=description]').val(),
+					'submit': 'createProfile'
+                };
+
+                // process the form
+                $.ajax({
+                    type        : 'POST', // define the type of HTTP verb we want to use (POST for our form)
+                    url         : '/profil', // the url where we want to POST
+                    data        : formData, // our data object
+                    dataType    : 'json', // what type of data do we expect back from the server
+                    encode		: true
+                })
+                // using the done promise callback
+                    .done(function(data) {
+
+                        console.log(data)
+                        // here we will handle errors and validation messages
+                        if (data.errors) {
+                            for (var i = 0; i < data.errors.length; i++) {
+                                $('#modal-body1').addClass('has-error'); // add the error class to show red input
+                                $('#modal-body1').prepend('<div class="help-block alert alert-warning">' + data.errors[i].msg + '</div>'); // add the actual error message under our input
+							}
+                        } else {
+                            if (data.user) {
+
+                                $('#exampleModalCenter').modal('hide');
+                                const genderOrientation = document.getElementById('genderOrientation');
+                                const description = document.getElementById('desc');
+                                const birthdate = document.getElementById('displayAge');
+                                genderOrientation.innerHTML = data.user.gender + ', ' + data.user.orientation;
+                                description.innerHTML = data.user.description;
+
+                                var date = new Date(data.user.birth);
+								var year = date.getFullYear();
+								var month = date.getMonth();
+								var day = date.getDate();
+								var today = new Date();
+
+								var age = today.getFullYear() - year;
+								if (today.getMonth() < month || (today.getMonth() === month && today.getDate() < day)) {
+									age--;
+								}
+
+                                birthdate.innerHTML = age + ' ans';
+
+                                if (document.getElementById('messages')) {
+                                    const flash = document.getElementsByClassName('alert alert-dark alert-dismissible');
+                                    flash[0].innerHTML = 'Votre profil RoooCool a été créé avec succès';
+                                } else {
+                                    $('#container').prepend('<div id="messages"></div>');
+                                    $('#messages').append('<div class="alert alert-dark alert-dismissible">Votre profil RoooCool a été créé avec succès</div>')
+                                }
+
+                                let options = {
+                                    year: 'numeric',
+                                    month: 'numeric',
+                                    day: 'numeric',
+                                };
+                                $("#birth").attr("value", date.toLocaleString('en-GB', options));
+
+                                document.getElementById("editDescription").value = data.user.description;
+                                document.getElementById("editDescription").innerHTML = document.getElementById("editDescription").value;
+
+                            }
+                        }
+                    });
+                // stop the form from submitting the normal way and refreshing the page
+                event.preventDefault();
+            });
+
+            $('form[id=modifyParams]').submit(function(event) {
+
+                $('.form-group').removeClass('has-error'); // remove the error class
+                $('.help-block').remove(); // remove the error text
+
+                // get the form data
+                // there are many ways to get this data using jQuery (you can use the class or id also)
+                var formData = {
+                    'firstname'              : $('input[name=firstname]').val(),
+                    'lastname'              : $('input[name=lastname]').val(),
+                    'email'              : $('input[name=email]').val(),
+                    'username'              : $('input[name=username]').val(),
+                    'birthdate'             : $('input[name=birth]').val(),
+					'currentPassword': $('input[name=currentPassword]').val(),
+					'newPassword': $('input[name=newPass]').val(),
+					'confirmNewPass': $('input[name=confirmNewPass]').val(),
+                    'submit': 'modifyParams'
+                };
+
+                // process the form
+                $.ajax({
+                    type        : 'POST', // define the type of HTTP verb we want to use (POST for our form)
+                    url         : '/profil', // the url where we want to POST
+                    data        : formData, // our data object
+                    dataType    : 'json', // what type of data do we expect back from the server
+                    encode		: true
+                })
+                // using the done promise callback
+                    .done(function(data) {
+
+                        console.log('data: ', data);
+
+                        // here we will handle errors and validation messages
+                        if (data.errors) {
+                            for (var i = 0; i < data.errors.length; i++) {
+                                $('#modal-body2').addClass('has-error');
+                                if (data.errors[i].msg) {
+                                    $('#modal-body2').prepend('<div class="help-block alert alert-warning">' + data.errors[i].msg + '</div>');
+								} else if (data.errors[i].errorMsg) {
+                                    $('#modal-body2').prepend('<div class="help-block alert alert-warning">' + data.errors[i].errorMsg + '</div>');
+								}
+                            }
+                        } else {
+                            if (data.user) {
+
+                                $('#accountParam').modal('hide');
+                                const userDetails = document.getElementById('userDetails');
+                                const birthdate = document.getElementById('displayAge');
+
+                                userDetails.innerHTML = data.user.username + " (" + data.user.firstname + " " + data.user.lastname + ")";
+
+                                var date = new Date(data.user.birth);
+                                var year = date.getFullYear();
+                                var month = date.getMonth();
+                                var day = date.getDate();
+                                var today = new Date();
+
+                                var age = today.getFullYear() - year;
+                                if (today.getMonth() < month || (today.getMonth() === month && today.getDate() < day)) {
+                                    age--;
+                                }
+
+                                birthdate.innerHTML = age + ' ans';
+
+                                if (document.getElementById('messages')) {
+                                    const flash = document.getElementsByClassName('alert alert-dark alert-dismissible');
+                                    flash[0].innerHTML = 'Vos paramètres ont bien été mis à jour';
+                                } else {
+                                    $('#container').prepend('<div id="messages"></div>');
+                                    $('#messages').append('<div class="alert alert-dark alert-dismissible">Vos paramètres ont bien été mis à jour</div>')
+                                }
+                            }
+                        }
+                    });
+                event.preventDefault();
+            });
+
+            $('form[id=modifyProfile]').submit(function(event) {
+
+                $('.form-group').removeClass('has-error'); // remove the error class
+                $('.help-block').remove(); // remove the error text
+
+                var formData = {
+                    'gender'         : $('select[name=editGender]').val(),
+                    'orientation'    : $('select[name=editOrientation]').val(),
+                    'description'    : $('textarea[name=editDescription]').val(),
+                    'submit': 'modifyProfile'
+                };
+
+                // process the form
+                $.ajax({
+                    type        : 'POST', // define the type of HTTP verb we want to use (POST for our form)
+                    url         : '/profil', // the url where we want to POST
+                    data        : formData, // our data object
+                    dataType    : 'json', // what type of data do we expect back from the server
+                    encode		: true
+                })
+                // using the done promise callback
+                    .done(function(data) {
+
+                        // here we will handle errors and validation messages
+                        if (data.errors) {
+
+                            for (var i = 0; i < data.errors.length; i++) {
+                                $('#modal-body3').addClass('has-error'); // add the error class to show red input
+                                $('#modal-body3').prepend('<div class="help-block alert alert-warning">' + data.errors[i].msg + '</div>'); // add the actual error message under our input
+                            }
+                        } else {
+                            if (data.user) {
+
+                                $('#editProfil').modal('hide');
+                                const genderOrientation = document.getElementById('genderOrientation');
+                                const description = document.getElementById('desc');
+                                genderOrientation.innerHTML = data.user.gender + ', ' + data.user.orientation;
+                                description.innerHTML = data.user.description;
+
+                                if (document.getElementById('messages')) {
+                                    const flash = document.getElementsByClassName('alert alert-dark alert-dismissible');
+                                    flash[0].innerHTML = 'Votre profil RoooCool a été mis à jour avec succès';
+                                } else {
+                                    $('#container').prepend('<div id="messages"></div>');
+                                    $('#messages').append('<div class="alert alert-dark alert-dismissible">Votre profil RoooCool a été mis à jour avec succès</div>')
+                                }
+
+                            }
+                        }
+                    });
+                // stop the form from submitting the normal way and refreshing the page
+                event.preventDefault();
+            });
+
+            $('form[id=uploadPics]').submit(function (event) {
+
+                var form = $('#uploadPics').get(0);
+                var formData = new FormData(form);
+
+                $.ajax({
+                    type		: 'POST',
+                    url		: '/profil',
+                    data		: formData,
+                    dataType	: 'json',
+                    processData: false,
+                    contentType: false,
+                    encode		: true
+                })
+                    .done(function (data) {
+                        if (data.errors) {
+                            if (document.getElementById('messages')) {
+                                const flash = document.getElementsByClassName('alert alert-dark alert-dismissible');
+                                flash[0].innerHTML = data.errors;
+                            } else {
+                                $('#container').prepend('<div id="messages"></div>');
+                                $('#messages').append('<div class="alert alert-dark alert-dismissible">' + data.errors + '</div>')
+                            }
+                        } else {
+                            if (data.file) {
+                                // if (($('.img-thumbnail.carroussel').length) < 5) {
+                                //     $('#rowPic').prepend('<div class="col-sm">\n' +
+                                //         '<img src="' + data.file + '" class="img-thumbnail carroussel" alt="...">\n' +
+                                //         '</div>');
+                                // } else {
+                                //     if (document.getElementById('messages')) {
+                                //         const flash = document.getElementsByClassName('alert alert-dark alert-dismissible');
+                                //         flash[0].innerHTML = 'Vous ne pouvez uploader que 5 images au maximum';
+                                //     } else {
+                                //         $('#container').prepend('<div id="messages"></div>');
+                                //         $('#messages').append('<div class="alert alert-dark alert-dismissible">Vous ne pouvez uploader que 5 images au maximum</div>')
+                                //     }
+                                // }
+                            }
+                        }
+                        console.log(data);
+                    });
+                event.preventDefault();
+            });
+        });
+	});
+</script>
