@@ -1,0 +1,201 @@
+<%- include('../partial/head')%>
+<%- include('../partial/header')%>
+
+    <h3 class="text-center">Messagerie Privée <i class="fas fa-comments"></i></h3>
+    <div class="messaging">
+        <div class="inbox_msg">
+            <div class="inbox_people">
+                <div class="headind_srch">
+                    <div class="recent_heading">
+                        <h4>Mes Matches</h4>
+                    </div>
+                </div>
+                <div class="inbox_chat">
+
+                    <%if (typeof myMatches === "object") {%>
+                    <%for (var x = 0; x < myMatches.length; x++) {%>
+                    <div class="chat_list" onclick="activeChat(this, <%=myMatches[x].id%>)">
+                        <div class="chat_people">
+                            <div class="chat_img"> <img src="<%=myMatches[x].profil%>" class="chat_img" style="border-radius: 50%; object-fit: cover;" alt="profil"> </div>
+                            <div class="chat_ib">
+                                <div id="chatOnline">
+                                    <h5><%=myMatches[x].username%>
+                                            <i class="fas fa-circle fa-xs user<%=myMatches[x].id%>"></i>
+                                    </h5>
+                                </div>
+                                <%if (typeof unread === "object") {%>
+                                    <%for (var y = 0; y < unread.length; y++) {%>
+                                        <%if (unread[y].from_user_id === myMatches[x].id) {%>
+                                            <%if (unread[y].unread !== 0) {%>
+                                            <p id="unreadMsg<%=unread[y].from_user_id%>"><%=unread[y].unread%> message(s) non lu</p>
+                                <%}}}}%>
+                            </div>
+                        </div>
+                    </div>
+                    <%}} else {%>
+                    <div class="noMatch">
+                        <p><%=myMatchesMsg%>...</p>
+                    </div>
+                    <%}%>
+                </div>
+            </div>
+            <div class="mesgs">
+                <div class="msg_history">
+                </div>
+                <div class="type_msg">
+                    <div class="input_msg_write">
+                        <form id="send-message">
+                            <input type="text" id="write_msg" class="write_msg" placeholder="Type a message" />
+                            <button class="msg_send_btn" type="submit"><i class="fas fa-paper-plane" aria-hidden="true"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<%- include('../partial/footer')%>
+
+<script>
+
+    $(function () {
+        $(document).ready(function () {
+            $('.type_msg').hide();
+            <%if (typeof myMatches === "object" && myMatches.length > 0) {%>
+            <%for (var t = 0; t < myMatches.length; t++) {%>
+                socket.emit('okreadyChat', <%=myMatches[t].id%>);
+
+            socket.on('onlineChat', (users) => {
+
+                for (var e = 0; e < users.users.length; e++) {
+                    if (parseInt(users.userOnline) === users.users[e].id) {
+                        if (users.users && document.querySelector('#chatOnline .user' + users.users[e].id)) {
+                            if (document.querySelector('#chatOnline .user' + users.users[e].id)) {
+                                document.querySelector('#chatOnline .user' + users.users[e].id).setAttribute('style', 'color: green;');
+                                return;
+                            }
+                        }
+                    }
+                }
+                if (users.users && document.querySelector('#chatOnline .user' + parseInt(users.userOnline))) {
+                    if (document.querySelector('#chatOnline .user' + parseInt(users.userOnline))) {
+                        document.querySelector('#chatOnline .user' + parseInt(users.userOnline)).setAttribute('style', 'color: red;');
+                    }
+                }
+
+            })
+
+            <%}}%>
+
+        });
+    });
+
+    function activeChat(tab, userId) {
+
+        var unread = document.getElementById('unreadMsg' + userId);
+        if (unread) {
+            decrementMsg(parseInt(unread.innerText));
+            unread.remove();
+        }
+
+
+        $('.type_msg').show();
+
+        var inputHidden = document.getElementById('hiddenInput');
+        if (inputHidden) {
+            inputHidden.remove();
+        }
+        inputHidden = document.createElement('input');
+        inputHidden.id = 'hiddenInput';
+        inputHidden.type = 'hidden'
+        inputHidden.value = userId;
+        tab.prepend(inputHidden);
+
+
+        const active = document.getElementsByClassName('active_chat');
+        if (active) {
+            for (var i = 0; i < active.length; i++) {
+                active[i].classList.remove('active_chat');
+            }
+        }
+        tab.setAttribute('class', 'chat_list active_chat');
+
+        const formData = {
+            'userId': userId,
+            'submit': 'getMessages'
+        }
+        $.ajax({
+            type		: 'POST',
+            url         : '/chat',
+            data		: formData,
+            dataType	: 'json',
+            encode		: true
+        })
+            .done(function(data) {
+                if (data) {
+                    const chat = document.querySelector('.msg_history');
+                    const noMessage = document.getElementById('noMessage');
+
+                    if (data.length === 0) {
+                        if (!noMessage) {
+                            while (chat.firstChild) {
+                                chat.removeChild(chat.firstChild);
+                            }
+                            const noMessage = document.createElement('h3');
+                            noMessage.id = 'noMessage';
+                            noMessage.innerText = "Aucun message n'a encore été échangé..."
+                            noMessage.setAttribute('style', 'color: #989898');
+                            chat.append(noMessage);
+                            chat.style.textAlign = 'center';
+                        }
+                    } else {
+                        if (noMessage) {
+                            noMessage.remove();
+                        }
+                        while (chat.firstChild) {
+                            chat.removeChild(chat.firstChild);
+                        }
+                        const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+                        for (var x = 0; x < data.length; x++) {
+                            chat.removeAttribute('style', 'text-align: center;');
+                            if (data[x].to_user_id === userId) {
+                                const outgoing = document.createElement('div');
+                                outgoing.setAttribute('class', 'outgoing_msg');
+                                const sentMsg = document.createElement('div');
+                                sentMsg.setAttribute('class', 'sent_msg');
+                                const p = document.createElement('p');
+                                p.innerText = data[x].message;
+                                const span = document.createElement('span');
+                                span.setAttribute('class', 'time_date')
+                                span.innerText = new Date(data[x].sent_at).toLocaleDateString('fr-FR', options);
+                                sentMsg.append(p);
+                                sentMsg.append(span);
+                                outgoing.append(sentMsg);
+                                chat.append(outgoing);
+                            } else if (data[x].from_user_id === userId) {
+                                const incoming = document.createElement('div');
+                                incoming.setAttribute('class', 'incoming_msg');
+                                const receivedMsg = document.createElement('div');
+                                receivedMsg.setAttribute('class', 'received_msg');
+                                const receivedMsgWith = document.createElement('div');
+                                receivedMsgWith.setAttribute('class', 'received_withd_msg');
+                                const p = document.createElement('p');
+                                p.innerText = data[x].message;
+                                const span = document.createElement('span');
+                                span.setAttribute('class', 'time_date')
+                                span.innerText = new Date(data[x].sent_at).toLocaleDateString('fr-FR', options);
+                                receivedMsgWith.append(p);
+                                receivedMsgWith.append(span);
+                                receivedMsg.append(receivedMsgWith);
+                                incoming.append(receivedMsg);
+                                chat.append(incoming);
+                            }
+                            setTimeout(() => {
+                                chat.scrollTop = chat.scrollHeight + 500;
+                            }, 10);
+                        }
+                    }
+                }
+            });
+    }
+</script>

@@ -1,0 +1,313 @@
+<% if(!index) {%>
+	<%- include('../partial/head')%>
+	<%- include('../partial/header')%>
+	
+	<!-- Search navbar -->
+	
+	<nav class="navbar fixed-top search-nav">
+		
+		<!-- Sort -->
+		
+		<form action="/search" method="get">
+			<div class="input-group mb-3">
+				<div class="input-group-prepend">
+					<label class="input-group-text" for="inputGroupSelect01">Trier par</label>
+				</div>
+				<select class="custom-select" name="sort" id="inputSort">
+					<option></option>
+					<option value="ageAsc" <% if (sort === "ageAsc") {%> selected <%}%>>Age croissant</option>
+					<option value="ageDesc" <% if (sort === "ageDesc") {%> selected <%}%>>Age décroissant</option>
+					<option value="loc" <% if (sort === "loc") {%> selected <%}%>>Localisation la plus proche</option>
+					<option value="popAsc" <% if (sort === "popAsc") {%> selected <%}%>>Popularité croissant</option>
+					<option value="popDesc" <% if (sort === "popDesc") {%> selected <%}%>>Popularité décroissant</option>
+					<option value="tag" <% if (sort === "tag") {%> selected <%}%>>Tags en commun</option>
+				</select>
+			</div>
+		</form>
+		
+		<!-- Filters -->
+		<% 
+		var tmp;
+		if (ageMin > ageMax){
+			tmp = ageMin; 
+			ageMin = ageMax;
+			ageMax = tmp;
+		}
+		if (popMin > popMax){
+			tmp = popMin; 
+			popMin = popMax;
+			popMax = tmp;
+		}
+		if (locMin > locMax){
+			tmp = locMin; 
+			locMin = locMax;
+			locMax = tmp;
+		}
+		if (ageMin < 18) {
+			ageMin = 18;
+		}
+		if (ageMax < 18){
+			ageMax = 18;
+		}
+		if (ageMin > 99) {
+			ageMin = 99;
+		}
+		if (ageMax > 99){
+			ageMax = 99;
+		}
+		if (popMin < -100) {
+			popMin = -100;
+		}
+		if (popMax < -100){
+			popMax = -100;
+		}
+		if (popMin > 100) {
+			popMin = 100;
+		}
+		if (popMax > 100){
+			popMax = 100;
+		}
+		if (locMin < 0) {
+			locMin = 0;
+		}
+		if (locMax < 0){
+			locMax = 0;
+		}
+		if (locMin > 100) {
+			locMin = 100;
+		}
+		if (locMax > 100){
+			locMax = 100;
+		}
+		if (!ageMin){
+			ageMin = 18;
+		}
+		if (!ageMax){
+			ageMax = 99;
+		}
+		if (!popMin){
+			popMin = -100;
+		}
+		if (!popMax){
+			popMax = 100;
+		}
+		if (!locMin){
+			locMin = 0;
+		}
+		if (!locMax){
+			locMax = 100;
+		}
+		%>
+		<div class="accordion" id="accordionExample">
+			<button class="btn btn-link forgot-password collapsed" type="button" data-toggle="collapse" data-target="#collapse" aria-expanded="false" aria-controls="collapse">
+				Recherche avancée
+			</button>
+		</div>
+		<div id="collapse" class="collapse" data-parent="#accordionExample">
+			<div class="card-body search-acc">
+				<form action="/search" method="get">
+					Age :
+					<div class="d-flex bd-highlight">
+						<div class="p-2 flex-fill bd-highlight" style="width: 80px; text-align:right;">18 ans</div>
+						<div class="p-2 flex-fill bd-highlight">
+							<input id="slideAge" type="text" class="span2" value="" data-slider-min="18" data-slider-max="99" data-slider-step="1" data-slider-value="[<%=ageMin%>,<%=ageMax%>]"data-slider-handle="round"/>
+						</div>
+						<div class="p-2 flex-fill bd-highlight" style="width: 80px; text-align:left;">99+</div>
+					</div>
+					
+					Popularité :
+					<div class="d-flex bd-highlight">
+						<div class="p-2 flex-fill bd-highlight" style="width: 80px; text-align:right;">-100%</div>
+						<div class="p-2 flex-fill bd-highlight">
+							<input id="slidePop" type="text" class="span2" value="" data-slider-min="-100" data-slider-max="100" data-slider-step="5" data-slider-value="[<%=popMin%>,<%=popMax%>]" data-slider-handle="round"/>
+						</div>
+						<div class="p-2 flex-fill bd-highlight" style="width: 80px; text-align:left;">100%</div>
+					</div>
+					
+					Localisation :
+					<div class="d-flex bd-highlight">
+						<div class="p-2 flex-fill bd-highlight" style="width: 80px; text-align:right;">0km</div>
+						<div class="p-2 flex-fill bd-highlight">
+							<input id="slideLoc" type="text" class="span2" value="" data-slider-min="0" data-slider-max="100" data-slider-step="1" data-slider-value="[<%=locMin%>,<%=locMax%>]" data-slider-handle="round"/>
+						</div>
+						<div class="p-2 flex-fill bd-highlight" style="width: 80px; text-align:left;">100km+</div>
+					</div>
+
+				<!-- Tags module -->
+				<div class="d-flex bd-highlight drop-search">
+						<div id="tags">
+
+							<% if (tags != null){
+								var tag = 0;
+								for (var k=0; k< tags.length; k++) {%>
+									<a class="btn btn-primary hashtag" href="#" role="button" onclick="deleteTag(this)">#<%=tags[k]%></a>
+								<% tag++;
+								}
+							}%>
+							<div>
+							<% if (tag < 5 || tags == null){%>
+								<input type="text" placeholder="Ajouter un Tag" id="addTag">
+							<% }%>
+                            </div>
+							<input id="previousTag" type="hidden" value ="<%=tags%>">
+						</div>
+						<div class="resultTag" id="resultTag"></div>
+				</div>
+					<button type="button" class="btn btn-primary filter-search" id="inputFilter">Rechercher</button>
+				</form>
+			</div>
+		</div>	
+</nav>
+
+<%}%>
+
+<!-- Results -->
+<div class="scroll" id="scroll">
+	<% var x = index;
+	var i = 0;
+	while (i < 12){
+		if (i===0 || i===3){ %>
+		<%}%>
+		<% if (users[x]){%>
+			<div class="col-sm search-col">
+				<div class="img-pop">
+					<div class="containerPic">
+						<a href="/user/<%=users[x]['id']%>"><img src="<%=users[x]['profil']%>" title="<%=users[x]['username']%>" alt="<%=users[x]['username']%>" class="profile-pic search-pic"></a>
+					</div>
+					<% if (users[x]['popularity'] >= 0){
+						if (users[x]['popularity'] < 50){ %>
+							<button type="button" id="pop<%=users[x]['id']%>" class="btn btn-primary popularity-search-1"><%=users[x]['popularity']%>%</button>
+						<% } else if (users[x]['popularity'] < 85) { %>
+							<button type="button" id="pop<%=users[x]['id']%>" class="btn btn-primary popularity-search-2"><%=users[x]['popularity']%>%</button>
+						<% } else { %>
+							<button type="button" id="pop<%=users[x]['id']%>" class="btn btn-primary popularity-search-3"><%=users[x]['popularity']%>%</button>
+						<%}
+					} else {
+						if (users[x]['popularity'] > -50){ %>
+							<button type="button" id="pop<%=users[x]['id']%>" class="btn btn-primary popularity-search-4"><%=users[x]['popularity']%>%</button>
+						<% } else if (users[x]['popularity'] > -85) { %>
+							<button type="button" id="pop<%=users[x]['id']%>" class="btn btn-primary popularity-search-5"><%=users[x]['popularity']%>%</button>
+						<% } else { %>
+							<button type="button" id="pop<%=users[x]['id']%>" class="btn btn-primary popularity-search-6"><%=users[x]['popularity']%>%</button>
+						<%}
+					}
+					%>
+				</div>
+				
+				<a class="lien-search" href="/user/<%=users[x]['id']%>"><div id="searchOnline">
+					<h5><i class="fas fa-circle fa-xs user<%=users[x]['id']%>"></i><%=users[x]['username']%></h5>
+				</div>
+
+				<h6>
+					<% if (users[x]['gender'] === null) { %>
+						Genre non renseigne,
+					<%} else { %>
+						<%=users[x]['gender']%>,
+					<% } %>
+					<% if (users[x]['orientation'] === null) { %>
+						orientation non renseignee
+					<%} else { %>
+						<%=users[x]['orientation']%>
+					<% } %>
+				</h6>
+
+				<h6 class="desc-search">
+					<% if (users[x]['description'] == null) { %>
+						Description manquante
+					<%} else { %>
+						<%=users[x]['description']%>
+					<% } %>
+				</h6></a>
+
+			<div id=likes>
+				<span><i class="fas fa-heartbeat matched" id="matched<%=users[x]['id']%>" title="c'est un match !" style="display:none"></i></span>
+				<span><i class="far fa-smile-wink liked" id="liked<%=users[x]['id']%>" title="Ce membre vous a liké !" style="display:none"></i></span>
+				<span><i class="far fa-thumbs-up picto" id="oklikeSearch-<%=users[x]['id']%>" style="text-align: center;"></i></span>
+				<span><i class="fas fa-thumbs-up picto" id="unlikeSearch-<%=users[x]['id']%>" style="text-align: center; display: none;"></i></span>
+			</div>	
+
+				<!-- Like and match check -->
+
+			<% var a = 0;
+			var like = 0;
+			var liked = 0;
+			while (likes[a]){
+				if (users[x]['id'] === likes[a]['user_id']) {
+					like = 1;
+				}
+				if (users[x]['id'] === likes[a]['user_liked']){
+					liked = 1;
+				}
+				a++;
+			}
+			if (like === 1 && liked === 1){ %>
+				<script>
+					document.getElementById("matched<%=users[x]['id']%>").style.display = "flex";
+					document.getElementById("oklikeSearch-<%=users[x]['id']%>").style.display = "none";
+					document.getElementById("unlikeSearch-<%=users[x]['id']%>").style.display = "flex";
+				</script>
+			<% } else if (like === 1 && liked === 0){ %>
+				<script>
+					document.getElementById("liked<%=users[x]['id']%>").style.display = "flex";
+				</script>
+			<% } else if (liked === 1 && like === 0) { %>
+				<script>
+					document.getElementById("oklikeSearch-<%=users[x]['id']%>").style.display = "none";
+					document.getElementById("unlikeSearch-<%=users[x]['id']%>").style.display = "flex";
+				</script>
+			<% }
+		} %>
+		</div>
+		<% i++;
+		if (i===3 || i===6){ %>
+		<% }  
+		x++;
+	}
+%>
+
+</div>
+
+<!-- Loading animation -->
+
+<% if (index == 0){ %>
+	<p id="loading" style="display:none">
+			<img style="width:40px; margin-left:50%" src="https://ubisafe.org/images/transparent-gif-loading-1.gif" alt="Loading…" />
+	</p>
+
+<!-- Scripts -->
+
+<script src="./public/js/scroll.js"></script>
+<script src="./public/js/like.js"></script>
+<script src="./public/js/tag-search.js"></script>
+    <% include ../partial/footer.ejs%>
+<% } %>
+
+<script>
+
+    $(function () {
+        $(document).ready(function () {
+			<%for (var t = 0; t < users.length; t++) {%>
+            socket.emit('okreadySearch', <%=users[t]['id']%>);
+            <%}%>
+            socket.on('onlineSearch', (users) => {
+                for (var e = 0; e < users.users.length; e++) {
+                    if (parseInt(users.userOnline) === users.users[e].id) {
+                        if (users.users && document.querySelector('#searchOnline .user' + users.users[e].id)) {
+                            if (document.querySelector('#searchOnline .user' + users.users[e].id)) {
+                                document.querySelector('#searchOnline .user' + users.users[e].id).setAttribute('style', 'color: green;');
+                                return;
+                            }
+                        }
+                    }
+                }
+                if (users.users && document.querySelector('#searchOnline .user' + parseInt(users.userOnline))) {
+                    if (document.querySelector('#searchOnline .user' + parseInt(users.userOnline))) {
+                        document.querySelector('#searchOnline .user' + parseInt(users.userOnline)).setAttribute('style', 'color: red;');
+                    }
+                }
+
+            })
+
+        });
+    });
+</script>

@@ -1,0 +1,454 @@
+<%- include('../partial/head')%>
+<%- include('../partial/header')%>
+
+<%- messages('partial/message', locals) %>
+
+<div class="media">
+    <img src="<%=user[0]['profil']%>" alt="profilPic" class="float-left profile-pic" height="220px" width="220px" id="avatarPic">
+    <div class="media-body">
+        <div style="display: flex" id="likeAndMatch">
+            <button type="button" class="btn btn-primary popularity">
+                Popularité <span class="badge badge-light"><%=user[0]['popularity']%>%</span>
+            </button>
+
+            <%var found1 = 0%>
+            <%var found2 = 0%>
+            <%var found3 = 0%>
+            <%var found4 = 0%>
+            <%var found5 = 0%>
+            <%if (likes !== null) {%>
+                <% for (var x = 0; x < likes.length; x++)  {%>
+                    <% if (likes[x].user_liked === user[0].id) {%>
+                        <%found1 = 1;%>
+                <%}}%>
+                <%if (found1 === 1) {%>
+                    <span><i class="fas fa-thumbs-up" style="color: dodgerblue; font-size: xx-large; margin-left: 10px" onclick="iUnlike(<%=user[0].id%>)"></i></span>
+                <%} else if(found1 === 0) {%>
+                    <span><i class="far fa-thumbs-up" style="font-size: xx-large; margin-left: 10px" onclick="iLike(<%=user[0].id%>)"></i></span>
+            <%}}%>
+
+            <%if (matches !== null) {%>
+                <% for (var y = 0; y < matches.length; y++)  {%>
+                    <% if (matches[y] === user[0].id) {%>
+                        <%found2 = 1;%>
+                <%}}%>
+                <%if (found2 === 1) {%>
+                    <span><i class="fas fa-heartbeat" style="color: red; font-size: xx-large; margin-left: 10px"></i></span>
+            <%}}%>
+
+            <%if (likes !== null && found2 === 0) {%>
+                <% for (var z = 0; z < likes.length; z++)  {%>
+                    <% if (likes[z].user_id === user[0].id) {%>
+                    <%found3 = 1;%>
+                <%}}%>
+                <%if (found3 === 1) {%>
+                    <span><i class="far fa-smile-wink" style="color: rgb(255, 0, 100); font-size: xx-large; margin-left: 10px"></i></span>
+            <%}}%>
+
+        </div>
+
+        <div id="checkOnline">
+            <h2 style="margin:0" class="mt-0" id="userDetails"><%=user[0]['username']%> (<%=user[0]['firstname']%> <%=user[0]['lastname']%>)</h2>
+        </div>
+
+
+        <div class="row">
+            <div class="col-sm" id=genderOrientation>
+                <% if (user[0]['gender'] === null) { %>
+                    Genre non renseigne,
+                <%} else { %>
+                <%=user[0]['gender']%>,
+                <% } %>
+                <% if (user[0]['orientation'] === null) { %>
+                    Orientation non renseignee
+                <%} else { %>
+                <%=user[0]['orientation']%>
+                <% } %>
+            </div>
+        </div>
+        <div class="row" id="age">
+            <div class="col-sm" id="displayAge">
+                <% if (user[0]['birth'] == null) { %>
+                    Date de naissance manquante
+                <%} else { %>
+                    <%= userage %> ans
+                <% } %>
+            </div>
+        </div>
+        <div class="row" id="location">
+            <div class="col-sm">
+                <% if (!user[0]['city']) { %>
+					<p id="localisation">Localisation non renseigné</p>
+				<%} else { %>
+					<p id="localisation">À <%=user[0]['city']%></p>
+				<% } %>
+            </div>
+        </div>
+        <div class="description" id="desc">
+            <% if (user[0]['description'] == null) { %>
+                Description manquante
+            <%} else { %>
+            <%=user[0]['description']%>
+            <% } %>
+        </div>
+
+        <div id="tags">
+            <% if (usertags != "") {
+            for (var i=0; i<usertags.length; i++){ %>
+            <a class="btn btn-primary hashtag" href="#" role="button">#<%=usertags[i]['tag']%></a>
+            <% }} %>
+        </div>
+    </div>
+</div>
+<br>
+<div class="row" id="rowPic" style="justify-content: left; margin-left: 4%;">
+
+    <% if (userphotos !== []) {
+    for (var j = 0; j < userphotos.length; j++) { %>
+    <div class="col-sm profil-gal">
+        <img src="<%=userphotos[j]['photo']%>" class="img-thumbnail carroussel" alt="...">
+    </div>
+    <% }} %>
+
+</div>
+</div>
+<div id="issues">
+
+    <%if (reports !== null) {%>
+        <% for (var r = 0; r < reports.length; r++)  {%>
+            <% if (reports[r].reported_id === user[0].id && reports[r].flag === 1) {%>
+            <%found4 = 1;%>
+        <%}}%>
+        <%if (found4 === 1) {%>
+            <p id="fake"><strong>It's a FAKE !</strong> <span><i class="fas fa-thumbs-down" style="font-size: x-large;"></i></span></p>
+            <%} else if(found4 === 0) {%>
+            <p id="notFake" onclick="reportFake(<%=user[0].id%>)">Reporter comme Faux Compte <span><i class="fas fa-thumbs-down" style="font-size: x-large"></i></span></p>
+    <%}}%>
+
+        <%if (reports !== null) {%>
+            <% for (var s = 0; s < reports.length; s++)  {%>
+                <% if (reports[s].reported_id === user[0].id && reports[s].flag === 2) {%>
+                <%found5 = 1;%>
+            <%}}%>
+            <%if (found5 === 1) {%>
+                <p id="block"><strong>Vous avez bloqué cet utilisateur...</strong> <span><i class="fas fa-angry" style="font-size: x-large;"></i></span></p>
+                <button class="btn btn-link forgot-password" onclick="unBlock(<%=user[0].id%>)">
+                    Débloquer cette personne ?
+                </button>
+            <%} else if(found5 === 0) {%>
+                <p id="notBlock" onclick="reportBlock(<%=user[0].id%>)">Bloquer cet utilisateur <span><i class="fas fa-angry" style="font-size: x-large"></i></span></p>
+        <%}}%>
+
+
+
+<% include ../partial/footer.ejs%>
+<script>
+
+
+    $('document').ready((e) => {
+        socket.emit('okreadyUser', <%=user[0]['id']%>);
+
+        socket.on('onlineUser', (users) => {
+            for (var e = 0; e < users.users.length; e++) {
+                if (parseInt(users.userOnline) == users.users[e].id) {
+
+                    const i = document.createElement('i');
+                    i.setAttribute('class', 'fas fa-circle fa-xs');
+                    i.setAttribute('style', 'color: green;');
+                    userDetails.prepend(i);
+                    return;
+                }
+            }
+            const p = document.createElement('p');
+            p.setAttribute('class', 'lastConnected');
+            p.setAttribute('style', 'margin-bottom: 10px; padding: 0; font-size: 12px;');
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+            p.innerText = 'dernière connexion le : ' + new Date(users.date).toLocaleDateString('fr-FR', options);
+            checkOnline.appendChild(p);
+        });
+    })
+
+
+    function iLike(userId) {
+        const formData = {
+            'userId': userId,
+            'submit': 'iLiked'
+        }
+
+        var splitedURL = window.location.pathname.split("/")
+        var id = splitedURL.reduce((acc, val, i) => {
+            if (val == "user" && i < splitedURL.length - 1)
+                acc = splitedURL[i + 1]
+            return acc
+        }, "")
+
+        $.ajax({
+            type        : 'POST',
+            url         : '/user/' + userId,
+            data        : formData,
+            dataType    : 'json',
+            encode        : true
+        })
+            .done(function(data) {
+                if (data.flag === '1' && userId == id) {
+                    $('.fa-thumbs-up').attr('class', 'fas fa-thumbs-up');
+                    $('.fa-thumbs-up').attr('style', 'color: dodgerblue; font-size: xx-large; margin-left: 10px');
+                    $('.fa-thumbs-up').attr('onclick', 'iUnlike(<%=user[0].id%>)');
+
+                    var pop = $('span.badge.badge-light')[0].innerHTML;
+                    if (parseInt(pop) < 50 && parseInt(pop) > -50) {
+                        $('span.badge.badge-light')[0].innerHTML = parseInt(pop) + 10 + '%';
+                    } else if (parseInt(pop) < 80 && parseInt(pop) > -80) {
+                        $('span.badge.badge-light')[0].innerHTML = parseInt(pop) + 5 + '%';
+                    } else if (parseInt(pop) < 99 && parseInt(pop) >= -100) {
+                        $('span.badge.badge-light')[0].innerHTML = parseInt(pop) + 2 + '%';
+                    }
+                }
+                if (data.getMatches && userId == id) {
+                    for (var i = 0; i < data.getMatches.length; i++) {
+                        if (data.getMatches[i] === userId) {
+                            $('#likeAndMatch').append('<span><i class="fas fa-heartbeat" style="color: red; font-size: xx-large; margin-left: 10px"></i></span>');
+                            if ($('.fa-smile-wink')) {
+                                $('.fa-smile-wink').remove();
+                            }
+                            if (data.messages) {
+                                if (data.messages.length !== 0) {
+                                    var unread = 0;
+                                    for (var k = 0; k < data.messages.length; k++) {
+                                        if (data.messages[k].from_user_id === userId) {
+                                            if (data.messages[k].unread === 1) {
+                                                unread++;
+                                            }
+                                        }
+                                    }
+                                    if (unread !== 0) {
+                                        incrementMsgMatch(unread);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+    }
+
+    function iUnlike(userId) {
+        const formData = {
+            'userId': userId,
+            'submit': 'iUnliked'
+        }
+
+        var splitedURL = window.location.pathname.split("/")
+        var id = splitedURL.reduce((acc, val, i) => {
+            if (val == "user" && i < splitedURL.length - 1)
+                acc = splitedURL[i + 1]
+            return acc
+        }, "")
+
+        $.ajax({
+            type        : 'POST',
+            url         : '/user/' + userId,
+            data        : formData,
+            dataType    : 'json',
+            encode        : true
+        })
+            .done(function(data) {
+                if (data.flag === '1' && userId == id) {
+                    $('.fa-thumbs-up').attr('class', 'far fa-thumbs-up');
+                    $('.fa-thumbs-up').attr('style', 'font-size: xx-large; margin-left: 10px');
+                    $('.fa-thumbs-up').attr('onclick', 'iLike(<%=user[0].id%>)');
+
+
+                    var pop = $('span.badge.badge-light')[0].innerHTML;
+                    if (parseInt(pop) < 50 && parseInt(pop) > -50) {
+                        $('span.badge.badge-light')[0].innerHTML = parseInt(pop) - 10 + '%';
+                    } else if (parseInt(pop) < 80 && parseInt(pop) > -80) {
+                        $('span.badge.badge-light')[0].innerHTML = parseInt(pop) - 5 + '%';
+                    } else if (parseInt(pop) <= 100 && parseInt(pop) > -99) {
+                        $('span.badge.badge-light')[0].innerHTML = parseInt(pop) - 2 + '%';
+                    }
+
+                    if ($('.fa-heartbeat')) {
+                        $('.fa-heartbeat').remove();
+                        if (data.messages) {
+                            if (data.messages.length !== 0) {
+                                var unread = 0;
+                                for (var k = 0; k < data.messages.length; k++) {
+                                    if (data.messages[k].from_user_id === userId) {
+                                        if (data.messages[k].unread === 1) {
+                                            unread++;
+                                        }
+                                    }
+                                }
+                                if (unread !== 0) {
+                                    decrementMsg(unread);
+                                }
+                            }
+                        }
+                    }
+                    for (var a = 0; a < data.theyLikedMe.length; a++){
+                        if (data.theyLikedMe && data.theyLikedMe[a].user_id === userId) {
+                            $('.fa-thumbs-up').append('<span><i class="far fa-smile-wink" style="color: rgb(255, 0, 100); font-size: xx-large; margin-left: 10px"></i></span>');
+                        }
+                    }
+                }
+            });
+
+    }
+
+    function reportFake(userId) {
+        const formData = {
+            'userId': userId,
+            'submit': 'iReport'
+        }
+        var splitedURL = window.location.pathname.split("/")
+        var id = splitedURL.reduce((acc, val, i) => {
+            if (val == "user" && i < splitedURL.length - 1)
+                acc = splitedURL[i + 1]
+                return acc
+        }, "")
+        $.ajax({
+            type		: 'POST',
+            url         : '/user/' + userId,
+            data		: formData,
+            dataType	: 'json',
+            encode		: true
+        })
+            .done(function(data) {
+                if (data && data.flag === 'reported updated' && userId == id) {
+                    $('#notFake').remove();
+                    const fake = document.createElement('p');
+                    fake.innerHTML = '<strong>It\'s a FAKE !</strong> <span><i class="fas fa-thumbs-down" style="font-size: x-large;"></i></span>';
+                    fake.style = 'color: red;';
+                    fake.id = 'fake';
+                    $('#issues').prepend(fake);
+
+                    var pop = $('span.badge.badge-light')[0].innerHTML;
+                    if (parseInt(pop) >= -50) {
+                        $('span.badge.badge-light')[0].innerHTML = parseInt(pop) - 50 + '%';
+                    } else if (parseInt(pop) <= -50) {
+                        $('span.badge.badge-light')[0].innerHTML = -100 + '%';
+                    }
+                }
+            });
+    }
+
+    function reportBlock(userId) {
+        const formData = {
+            'userId': userId,
+            'submit': 'iBlock'
+        }
+        var splitedURL = window.location.pathname.split("/")
+        var id = splitedURL.reduce((acc, val, i) => {
+            if (val == "user" && i < splitedURL.length - 1)
+                acc = splitedURL[i + 1]
+            return acc
+        }, "")
+        $.ajax({
+            type		: 'POST',
+            url         : '/user/' + userId,
+            data		: formData,
+            dataType	: 'json',
+            encode		: true
+        })
+            .done(function(data) {
+
+                if (data && data.flag === 'blocked' && userId == id) {
+                    $('#notBlock').remove();
+                    const block = document.createElement('p');
+                    block.innerHTML = '<strong>Vous avez bloqué cet utilisateur...</strong> <span><i class="fas fa-angry" style="font-size: x-large;"></i></span>';
+                    block.style = 'color: red;';
+                    block.id = 'block';
+                    $('#issues').append(block);
+
+                    const link = document.createElement('button');
+                    link.setAttribute('class', 'btn btn-link forgot-password');
+                    link.setAttribute('onclick', 'unBlock(<%=user[0].id%>)');
+                    link.innerHTML = 'Débloquer cette personne ?';
+                    $('#issues').append(link);
+
+                    var pop = $('span.badge.badge-light')[0].innerHTML;
+                    if (parseInt(pop) >= -85) {
+                        $('span.badge.badge-light')[0].innerHTML = parseInt(pop) - 15 + '%';
+                    } else if (parseInt(pop) <= -85) {
+                        $('span.badge.badge-light')[0].innerHTML = -100 + '%';
+                    }
+
+                    if (data.messages.length !== 0) {
+                        var unread = 0;
+                        for (var k = 0; k < data.messages.length; k++) {
+                            if (data.messages[k].from_user_id === userId) {
+                                if (data.messages[k].unread === 1) {
+                                    unread++;
+                                }
+                            }
+                        }
+                        decrementMsg(unread);
+                    }
+                }
+            });
+    }
+
+    function unBlock(userId) {
+        const formData = {
+            'userId': userId,
+            'submit': 'iUnblock'
+        }
+        var splitedURL = window.location.pathname.split("/")
+        var id = splitedURL.reduce((acc, val, i) => {
+            if (val == "user" && i < splitedURL.length - 1)
+                acc = splitedURL[i + 1]
+            return acc
+        }, "")
+        $.ajax({
+            type		: 'POST',
+            url         : '/user/' + userId,
+            data		: formData,
+            dataType	: 'json',
+            encode		: true
+        })
+            .done(function(data) {
+                if (data && data.flag === 'unblocked' && userId == id) {
+                    $('#block').remove();
+                    $('button.btn-link').remove();
+                    const unblock = document.createElement('p');
+                    unblock.id = 'notBlock';
+                    unblock.setAttribute('onclick', 'reportBlock(<%=user[0].id%>)');
+                    unblock.innerHTML = 'Bloquer cet utilisateur <span><i class="fas fa-angry" style="font-size: x-large"></i></span>';
+                    $('#issues').append(unblock);
+
+                    var pop = $('span.badge.badge-light')[0].innerHTML;
+                    if (parseInt(pop) <= 85) {
+                        $('span.badge.badge-light')[0].innerHTML = parseInt(pop) + 15 + '%';
+                    } else if (parseInt(pop) >= 85) {
+                        $('span.badge.badge-light')[0].innerHTML = 100 + '%';
+                    }
+                }
+
+                if (data.getMatches && userId == id) {
+                    for (var i = 0; i < data.getMatches.length; i++) {
+                        if (data.getMatches[i] === userId) {
+                            if (data.messages) {
+                                if (data.messages.length !== 0) {
+                                    var unread = 0;
+                                    for (var k = 0; k < data.messages.length; k++) {
+                                        if (data.messages[k].from_user_id === userId) {
+                                            if (data.messages[k].unread === 1) {
+                                                unread++;
+                                            }
+                                        }
+                                    }
+                                    if (unread !== 0) {
+                                        incrementMsgMatch(unread);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            });
+    }
+
+</script>

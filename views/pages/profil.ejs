@@ -1,0 +1,263 @@
+<%- include('../partial/head')%>
+<%- include('../partial/header')%>
+
+<%- messages('partial/message', locals) %>
+
+<!-- Modal -->
+<% if (user && user[0] && (user[0].birth === null || user[0].birth === '' ||user[0].gender == null || user[0].gender === '' || user[0].orientation === null || user[0].orientation === '' || user[0].description === null || user[0].description === '')) { %>
+	<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalCenterTitle">Informations Personnelles</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body" id="modal-body1">
+					<p style="text-align: center"><%=user[0].firstname%>, Afin de finaliser votre profil</p>
+					<input name="displayUser" type="hidden" id="displayUser" value="<%=user[0].username%>">
+					<p style="text-align: center">Merci de renseigner les champs restés vides</p>
+					<form id="saveProfile">
+						<div class="form-group">
+							<label for="gender" class="col-form-label">Votre Genre</label>
+							<select name="gender" class="form-control" id="gender">
+								<option value="Femme" selected>Femme</option>
+                                <option value="Homme">Homme</option>
+                                <option value="Femme-Transgenre">Femme Transgenre</option>
+                                <option value="Homme-Transgenre">Homme Transgenre</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="birthdate" class="col-form-label">Votre Date de Naissance</label>
+							<input name="birthdate" type="text" class="form-control" id="birthdate" value="<%=user[0].birth%>">
+						</div>
+						<div class="form-group">
+							<label for="sexOrientation" class="col-form-label">Votre Orientation Sexuelle</label>
+							<select name="orientation" class="form-control" id="sexOrientation">
+                                <option value="Bisexuel"<% if (user[0].orientation === 'Bisexuel') {%> selected <%}%>>Bisexuel</option>
+                                <option value="Heterosexuel"<% if (user[0].orientation === 'Heterosexuel') {%> selected <%}%>>Heterosexuel</option>
+                                <option value="Homosexuel"<% if (user[0].orientation === 'Homosexuel') {%> selected <%}%>>Homosexuel</option>
+                                <option value="Pansexuel"<% if (user[0].orientation === 'Pansexuel') {%> selected <%}%>>Pansexuel</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="description" class="col-form-label">Description</label>
+							<textarea name="description" class="form-control" id="description"><%=user[0].description%></textarea>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+							<button type="submit" class="btn login-btn">Confirmer</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+<% } %>
+
+<div class="media">
+    <img src="<%=user[0]['profil']%>" alt="profilPic" class="float-left profile-pic" height="220px" width="220px" id="avatarPic">
+    <div class="media-body">
+		<button type="button" class="btn btn-primary popularity button-profil">
+			Popularité <span class="badge badge-light"><%=user[0]['popularity']%>%</span>
+		</button>
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary button-profil" data-toggle="modal" data-target="#accountParam">
+            Vos Paramètres  <span><i class="fas fa-toolbox"></i></span>
+        </button>
+        <button type="button" class="btn btn-primary button-profil" data-toggle="modal" data-target="#editProfil">
+            Votre Profil  <span><i class="fas fa-user-edit"></i></span>
+        </button>
+		<h2 class="mt-0" id="userDetails"><%=user[0]['username']%> (<%=user[0]['firstname']%> <%=user[0]['lastname']%>)</h2>
+
+        <!-- Modal Parameters -->
+		<div class="modal fade" id="accountParam" tabindex="-1" role="dialog" aria-labelledby="accountParametersModification" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="accountParametersModification">Modifier les paramètres de votre Compte</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body" id="modal-body2">
+						<form id="modifyParams">
+							<div class="form-group">
+								<label for="firstname" class="col-form-label">Prénom</label>
+								<input name="firstname" type="text" class="form-control" id="firstname" value="<%=user[0].firstname%>">
+							</div>
+							<div class="form-group">
+								<label for="lastname" class="col-form-label">Nom</label>
+								<input name="lastname" type="text" class="form-control" id="lastname" value="<%=user[0].lastname%>">
+							</div>
+							<div class="form-group">
+								<label for="email" class="col-form-label">Email</label>
+								<input name="email" type="email" class="form-control" id="email" value="<%=user[0].email%>">
+							</div>
+							<div class="form-group">
+								<label for="username" class="col-form-label">Identifiant</label>
+								<input name="username" type="text" class="form-control" id="username" value="<%=user[0].username%>">
+							</div>
+							<div class="form-group">
+								<label for="birth" class="col-form-label">Votre date de naissance</label>
+								<input name="birth" type="text" class="form-control" id="birth" value="<%=user[0].birth%>">
+							</div>
+
+							<div class="accordion" id="modifyPass">
+								<button class="btn btn-dark collapsed" type="button" data-toggle="collapse" data-target="#open" aria-expanded="false" aria-controls="collapse">
+									Modifier son Mot de Passe
+								</button>
+							</div>
+							<div id="open" class="collapse" data-parent="#modifyPass">
+								<div class="card-body">
+									<div class="form-group" style="margin-bottom: 0">
+										<label for="currentPass">Mot de Passe actuel</label>
+										<input type="password" class="form-control" id="currentPassword" name="currentPassword" style="margin-bottom: 5px;" placeholder="Entrez votre mot de passe actuel">
+										<input type="password" class="form-control" id="newPass" name="newPass" style="margin-bottom: 5px;" placeholder="Nouveau Mot de Passe">
+										<input type="password" class="form-control" id="confirmNewPass" name="confirmNewPass" placeholder="Confirmer le nouveau mot de passe">
+									</div>
+								</div>
+							</div>
+
+							<div class="modal-footer" style="border-top: none;">
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+								<button type="submit" class="btn login-btn">Modifier</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+        <!-- Modal Profile-->
+        <div class="modal fade" id="editProfil" tabindex="-1" role="dialog" aria-labelledby="editProfilInfo" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editProfilInfo">Editer votre Profil RoooCool</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="modal-body3">
+                        <form id="modifyProfile">
+                            <div class="form-group">
+                                <label for="editGender" class="col-form-label">Votre Genre</label>
+                                <select name="editGender" class="form-control" id="editGender">
+                                    <option value="Femme"<% if (user[0].gender === 'Femme') {%> selected <%}%>>Femme</option>
+                                    <option value="Homme"<% if (user[0].gender === 'Homme') {%> selected <%}%>>Homme</option>
+                                    <option value="Femme-Transgenre"<% if (user[0].gender === 'Femme-Transgenre') {%> selected <%}%>>Femme Transgenre</option>
+                                    <option value="Homme-Transgenre"<% if (user[0].gender === 'Homme-Transgenre') {%> selected <%}%>>Homme Transgenre</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editOrientation" class="col-form-label">Votre Orientation Sexuelle</label>
+                                <select name="editOrientation" class="form-control" id="editOrientation">
+                                    <option value="Bisexuel"<% if (user[0].orientation === 'Bisexuel') {%> selected <%}%>>Bisexuel</option>
+                                    <option value="Heterosexuel"<% if (user[0].orientation === 'Heterosexuel') {%> selected <%}%>>Heterosexuel</option>
+                                    <option value="Homosexuel"<% if (user[0].orientation === 'Homosexuel') {%> selected <%}%>>Homosexuel</option>
+                                    <option value="Pansexuel"<% if (user[0].orientation === 'Pansexuel') {%> selected <%}%>>Pansexuel</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="editDescription" class="col-form-label">Description</label>
+                                <textarea name="editDescription" class="form-control" id="editDescription"><%=user[0].description%></textarea>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn login-btn">Modifier</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm" id=genderOrientation>
+				<% if (user[0]['gender'] === null) { %>
+					Genre non renseigne,
+				<%} else { %>
+					<%=user[0]['gender']%>,
+				<% } %>
+				<% if (user[0]['orientation'] === null) { %>
+					Orientation non renseignee
+				<%} else { %>
+					<%=user[0]['orientation']%>
+				<% } %>
+			</div>
+		</div>
+		<div class="row" id="age">
+			<div class="col-sm" id="displayAge">
+				<% if (user[0]['birth'] == null) { %>
+					Date de naissance manquante
+				<%} else { %>
+					<%= userage %> ans
+				<% } %>
+			</div>
+		</div>
+		<div class="row" id="location">
+			<div class="col-sm" id="displayLoc">
+				<% if (!user[0]['city']) { %>
+					<p id="localisation">Localisation non renseigné</p>
+				<%} else { %>
+					<p id="localisation">À <%=user[0]['city']%></p>
+				<% } %>
+					<div id="locationField">
+						<input id="autocomplete" placeholder="Modifier votre ville" type="text">
+					</div>
+					<a class="btn btn-primary hashtag" href="#" role="button" onclick="getLocation(1)"><i class="fas fa-map-marker-alt"></i></a>
+				<% if (user[0]['changed_loc'] == "N") { %>
+					<script src="./public/js/auto-geoloc.js"></script>
+				<% } else if (user[0]['changed_loc'] == "E") { %>
+					<script src="./public/js/newloc.js"></script>
+				<% } %>
+				</div>
+		</div>
+		<div class="description" id="desc">
+			<% if (user[0]['description'] == null) { %>
+				Description manquante
+			<%} else { %>
+				<%=user[0]['description']%>
+			<% } %>
+		</div>
+
+        <div id="tags">
+            <% if (usertags != "") {
+            for (var i=0; i<usertags.length; i++){ %>
+            <a class="btn btn-primary hashtag" href="#" role="button" onclick="deleteTag(this)">#<%=usertags[i]['tag']%></a>
+            <% }} %>
+            <input type="text" placeholder="Ajouter un Tag" id="addTag"/>
+        </div>
+	</div>
+</div>
+<br>
+<div class="row" id="rowPic" style="justify-content: left; margin-left: 4%;">
+
+    <% if (userphotos !== []) {
+    for (var j = 0; j < userphotos.length; j++) { %>
+    <div class="col-sm profil-gal">
+        <button type="button" class="photos" onclick="changePic(this)"><img src="<%=userphotos[j]['photo']%>" class="img-thumbnail carroussel" alt="..."></button>
+        <button type="button" class="close" aria-label="Close" onclick="deletePic(this)">
+            <span aria-hidden="true" style="position: absolute; top: -9px; right: 12px;"><i class="fas fa-times-circle"></i></span>
+        </button>
+    </div>
+    <% }} %>
+
+    <form id="uploadPics" style="text-align: center; display: flex; align-items: center" enctype="multipart/form-data" method="POST" action="/profil">
+        <label for="inputFile"><span><i class="fas fa-plus-circle fa-5x" style="color: #888888; text-align: center;"></i></span><br/>
+            Ajouter une image
+        </label>
+            <input id="inputFile" type="file" name="inputFile" style="display: none">
+    </form>
+
+</div>
+
+<script src="./public/js/profilscript.js"></script>
+<script src="./public/js/localisation.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBeGqsazfzYjC4__DuVZ-pB6Hik52ciaNI&libraries=places&callback=initAutocomplete"
+async defer></script>
+
+<% include ../partial/footer.ejs%>
