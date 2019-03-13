@@ -26,7 +26,7 @@ Grade: 125/100
 </a>
 
 <a href="https://expressjs.com/" target="_blank">
-    <img width="180" height='90' src="https://expressjs.com/images/express-facebook-share.png">
+    <img width="200" height='90' src="https://expressjs.com/images/express-facebook-share.png">
 </a>
 
 <a href="https://www.mysql.com/" target="_blank">
