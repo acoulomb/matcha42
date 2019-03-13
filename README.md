@@ -25,8 +25,12 @@ Grade: 125/100
     <img width="150" height='90' src="https://cdn.worldvectorlogo.com/logos/nodejs.svg">
 </a>
 
+<a href="https://www.npmjs.com" target="_blank">
+    <img width="100" height='50' style="display: none" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Npm-logo.svg/1280px-Npm-logo.svg.png">
+</a>
+
 <a href="https://expressjs.com/" target="_blank">
-    <img width="200" height='90' src="https://expressjs.com/images/express-facebook-share.png">
+    <img width="120" height='50' src="https://expressjs.com/images/express-facebook-share.png">
 </a>
 
 <a href="https://www.mysql.com/" target="_blank">
